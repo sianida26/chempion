@@ -3,6 +3,7 @@ import * as PIXI from "pixi.js";
 import config from "../config";
 import commentBarImage from "../assets/sprite/comment_bar.gif";
 import { splitIntoLines } from "../helper";
+import { globalEmitter } from "../eventEmitter";
 
 export default class CommentBar{
 
@@ -73,10 +74,12 @@ export default class CommentBar{
     }
 
     hide(){
+        globalEmitter.emit("commentBarHiding");
         this.container.visible = false;
     }
 
     show(){
+        globalEmitter.emit("commentBarShowing");
         this.container.visible = true;
     }
     
