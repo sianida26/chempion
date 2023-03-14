@@ -6,7 +6,6 @@ import AbstractStage from "../classes/AbstractStage";
 import backgroundImg from "../assets/map/varma.png";
 import knight from "../assets/sprite/knight_idle.gif";
 import { pause } from "../helper";
-import config from "../config";
 import CommentBar from "../classes/CommentBar";
 import Bag from "../classes/Bag";
 

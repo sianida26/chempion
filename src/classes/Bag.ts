@@ -16,14 +16,14 @@ export default class Bag{
     readonly container: PIXI.Container = new PIXI.Container();
     readonly inventoryBoxContainer = new PIXI.Container();
     readonly numberOfBoxes = 20;
-    private readonly inventoryBoxes: InventoryBox[] = [];
+    // private readonly inventoryBoxes: InventoryBox[] = [];
 
     private app: PIXI.Application;
     private textures: Textures;
     private bagSprite: PIXI.Sprite;
 
     //Bag states
-    private isOver = false;
+    // private isOver = false;
 
     private constructor(app: PIXI.Application, textures: Textures){
         this.app = app;
