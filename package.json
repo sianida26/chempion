@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy" : "tsc && vite build && firebase deploy"
+    "deploy": "tsc && vite build && firebase deploy"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
@@ -19,6 +19,7 @@
   "dependencies": {
     "@pixi/gif": "^2.1.0",
     "@types/pixi.js": "^5.0.0",
+    "gsap": "^3.11.4",
     "pixi.js": "^7.1.4",
     "sass": "^1.59.2"
   }

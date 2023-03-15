@@ -1,27 +1,29 @@
 import * as PIXI from "pixi.js";
 
 import config from "../config";
-import commentBarImage from "../assets/sprite/comment_bar.gif";
 import { splitIntoLines } from "../helper";
 import { globalEmitter } from "../eventEmitter";
+import { assets } from "./AssetResolver";
+import { AnimatedGIF } from "@pixi/gif";
 
 export default class CommentBar{
 
     app: PIXI.Application;
     container: PIXI.Container;
     message: string = "";
-    private theBar: PIXI.Sprite;
+    name: string = "";
+    private theBar: AnimatedGIF;
     private theMessage: PIXI.Text;
     private theName: PIXI.Text;
     private splittedText: String[] = [];
     private messageLinePos: number = 0;
 
-    private constructor(app: PIXI.Application, sprite: PIXI.Sprite){
+    constructor(app: PIXI.Application){
         this.app = app;
 
         this.container = new PIXI.Container();
 
-        this.theBar = sprite;
+        this.theBar = assets.sprites.commentBar;
         // this.theBar.width = this.app.renderer.width;
 		// this.theBar.height = (112 * this.app.renderer.height) / config.editorHeight;
         this.theBar.interactive = true;
@@ -40,12 +42,8 @@ export default class CommentBar{
         this.loadText();
     }
 
-    static async makeCommentBar(app: PIXI.Application){
-        return new this(app, await PIXI.Assets.load(commentBarImage));
-    }
-
     private async loadText(){
-        await PIXI.Assets.loadBundle("fonts");
+        // await PIXI.Assets.loadBundle("fonts");
         const textPosition = { x: 160, y: 340 };
         const textStyle = new PIXI.TextStyle({
 			fontFamily: "VT323",
@@ -54,7 +52,7 @@ export default class CommentBar{
 			wordWrap: true,
 			wordWrapWidth: config.appWidth - textPosition.x,
 		});
-        this.theName = new PIXI.Text("Nama:", textStyle);
+        this.theName = new PIXI.Text(this.name + ":", textStyle);
         this.theName.x = 160;
         this.theName.y = 45; 
         this.container.addChild(this.theName);
@@ -63,9 +61,17 @@ export default class CommentBar{
         this.theMessage.x = 160;
         this.theMessage.y = 70;
         this.container.addChild(this.theMessage)
+
+        //add keyboard event
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Enter"){
+                this.handleBarClick()
+            }
+        })
     }
 
     private handleBarClick(){
+        if (!this.isShowing) return;
         if (this.messageLinePos + 3 >= this.splittedText.length){
             this.hide();
         } else {
@@ -96,6 +102,8 @@ export default class CommentBar{
         this.theMessage.text = "";
         const showMessage = this.splittedText.slice(this.messageLinePos, this.messageLinePos+3).join(" ");
 
+        this.theName.text = this.name + ":";
+
         let currentIndex = 0;
 		const ticker = () => {
 			if (currentIndex < showMessage.length) {
@@ -108,7 +116,8 @@ export default class CommentBar{
 		this.app.ticker.add(ticker);
     }
 
-    showMessage(message: string = ""){
+    showMessage(name: string = "", message: string = ""){
+        this.name = name;
         this.message = message;
         this.splittedText = splitIntoLines(this.message);
         console.log(this.splittedText);

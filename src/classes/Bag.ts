@@ -1,35 +1,31 @@
 import * as PIXI from "pixi.js";
-import bagImage from "../assets/sprite/bag.png";
-import bagHighlight from "../assets/sprite/bag_highlight.png";
-import inventoryBoxImage from "../assets/sprite/inventory_box.png";
 import { globalEmitter } from "../eventEmitter";
+import { assets } from "./AssetResolver";
 import InventoryBox from "./InventoryBox";
+import { ItemType } from "./InventoryItem";
 
-interface Textures{
-    bag: PIXI.Texture
-    bagHover: PIXI.Texture
-    inventoryBox: PIXI.Texture
-    items?: {[k: string]: PIXI.Texture}
-}
 export default class Bag{
 
     readonly container: PIXI.Container = new PIXI.Container();
     readonly inventoryBoxContainer = new PIXI.Container();
     readonly numberOfBoxes = 20;
-    // private readonly inventoryBoxes: InventoryBox[] = [];
+    private readonly inventoryBoxes: InventoryBox[] = [];
 
-    private app: PIXI.Application;
-    private textures: Textures;
+    private readonly app: PIXI.Application;
     private bagSprite: PIXI.Sprite;
+    public items: ItemType[] = [
+        "salt",
+        "grass",
+        "hay",
+    ];
 
     //Bag states
     // private isOver = false;
 
-    private constructor(app: PIXI.Application, textures: Textures){
+    constructor(app: PIXI.Application){
         this.app = app;
-        this.textures = textures;
 
-        this.bagSprite = PIXI.Sprite.from(textures.bag);
+        this.bagSprite = PIXI.Sprite.from(assets.sprites.bag);
         this.bagSprite.interactive = true;
         this.bagSprite
                 .on("mouseover", this.handleMouseOver.bind(this))
@@ -44,36 +40,33 @@ export default class Bag{
 
         //create inventory boxes
         for (let i = 0; i < this.numberOfBoxes; i++){
-            const inventoryBox = new InventoryBox(PIXI.Sprite.from(textures.inventoryBox));
-            inventoryBox.sprite.x = (i%10) * (inventoryBox.sprite.width + 2); //gap: 2
-            inventoryBox.sprite.y = Math.floor(i/10) * (inventoryBox.sprite.height + 2); //gap: 2
-            this.inventoryBoxContainer.addChild(inventoryBox.sprite);
+            const inventoryBox = new InventoryBox();
+            inventoryBox.container.x = (i%10) * (inventoryBox.sprite.width + 2); //gap: 2
+            inventoryBox.container.y = Math.floor(i/10) * (inventoryBox.sprite.height + 2); //gap: 2
+            this.inventoryBoxes.push(inventoryBox);
+            this.inventoryBoxContainer.addChild(inventoryBox.container);
         }
         this.inventoryBoxContainer.x = this.bagSprite.width;
         this.inventoryBoxContainer.y = this.bagSprite.y;
         this.inventoryBoxContainer.visible = false; //hidden by default
         this.container.addChild(this.inventoryBoxContainer);
 
+        //attach invetory items to the box container
+        for (let i = 0; i < this.items.length; i++){
+            this.inventoryBoxes[i].setItem(this.items[i])
+        }
+
         //listen to events
         globalEmitter.on("commentBarShowing", this.disableInteractivity.bind(this));
         globalEmitter.on("commentBarHiding", this.enableInteractivity.bind(this));
     }
 
-    public static async makeBag(app: PIXI.Application){
-        const [bag, bagHover, inventoryBox] = await Promise.all([
-            PIXI.Assets.load(bagImage),
-            PIXI.Assets.load(bagHighlight),
-            PIXI.Assets.load(inventoryBoxImage),
-        ]);
-        return new this(app, { bag, bagHover, inventoryBox });
-    }
-
     private handleMouseOver(){
-        this.bagSprite.texture = this.textures.bagHover;
+        this.bagSprite.texture = assets.sprites.bagHighlight;
     }
 
     private handleMouseOut(){
-        this.bagSprite.texture = this.textures.bag;
+        this.bagSprite.texture = assets.sprites.bag;
     }
 
     private handleBagClick(){
